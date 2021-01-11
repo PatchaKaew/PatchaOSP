@@ -13,7 +13,8 @@ class _AuthenState extends State<Authen> {
 
   @override
   Widget build(BuildContext context) {
-    screen = MediaQuery.of(context).size.width; //หาตัวแปรว่าอยู่จอขนาดเท่าไหร่
+    //screen = MediaQuery.of(context).size.width; //หาตัวแปรว่าอยู่จอขนาดเท่าไหร่
+    screen = MyStyle().findScreen(context);
     print('screen = $screen'); //print ค่าหน้าจอออกมาดู
     return Scaffold(
       floatingActionButton: buildRegister(),
@@ -43,7 +44,7 @@ class _AuthenState extends State<Authen> {
 
   FlatButton buildRegister() {
     return FlatButton(
-        onPressed: () {},
+        onPressed: () => Navigator.pushNamed(context, '/register'), //ลิ้งค์ไปหน้าใหม่
         child: Text(
           'New Register',
           style: MyStyle().pinkStyle(),
