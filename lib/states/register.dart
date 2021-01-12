@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:kaewosp/utility/my_style.dart';
 import 'package:location/location.dart';
 
@@ -153,6 +154,16 @@ class _RegisterState extends State<Register> {
     );
   }
 
+//มี Marker ได้มากกว่า 1 ตัว
+  Set<Marker> markers() => <Marker>[
+        Marker(
+          markerId: MarkerId('idMarker1'),
+          position: LatLng(lat, lng),
+          infoWindow: InfoWindow(
+              title: 'คุณอยู่ที่นี่', snippet: 'Lat =$lat, Lng=$lng'),
+        ),
+      ].toSet();
+
 //Map
   Expanded buildMap() {
     return Expanded(
@@ -163,7 +174,14 @@ class _RegisterState extends State<Register> {
         //if else แบบสั้น
         child: lat == null
             ? MyStyle().showProgress()
-            : Text('lat = $lat, lng =$lng'),
+            : GoogleMap(
+                markers: markers(),
+                initialCameraPosition: CameraPosition(
+                  target: LatLng(lat, lng),
+                  zoom: 16,
+                ),
+                onMapCreated: (controller) {},
+              ),
       ),
     );
   }
