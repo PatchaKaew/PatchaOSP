@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kaewosp/utility/my_style.dart';
+import 'package:location/location.dart';
 
 class Register extends StatefulWidget {
   @override
@@ -7,8 +8,35 @@ class Register extends StatefulWidget {
 }
 
 class _RegisterState extends State<Register> {
+  //ประกาศตัวแปร
   double screen;
   String typeUser;
+  double lat, lng;
+
+//ทำงานก่อน Build
+  @override
+  void initState() {
+    super.initState();
+    findLatLng();
+  }
+
+  //ทำงานรอผลลัพธ์ ถ้า Method ทำงานแล้วไม่บอกผลลัพธ์
+  Future<Null> findLatLng() async {
+    LocationData data = await findLocationData();
+    setState(() {
+      lat = data.latitude;
+      lng = data.longitude;
+    });
+  }
+
+  Future<LocationData> findLocationData() async {
+    Location location = Location();
+    try {
+      return location.getLocation();
+    } catch (e) {
+      return null;
+    }
+  }
 
   Container buildName() {
     return Container(
@@ -118,16 +146,24 @@ class _RegisterState extends State<Register> {
             buildPassword(),
 
             //กำหนดแผนที่
-            Expanded(
-              child: Container(
-                margin: EdgeInsets.all(16),
-                width: screen,
-                color: Colors.grey,
-                child: Text('This is Map'),
-              ),
-            ),
+            buildMap(),
           ],
         ),
+      ),
+    );
+  }
+
+//Map
+  Expanded buildMap() {
+    return Expanded(
+      child: Container(
+        margin: EdgeInsets.all(16),
+        width: screen,
+        //color: Colors.grey,
+        //if else แบบสั้น
+        child: lat == null
+            ? MyStyle().showProgress()
+            : Text('lat = $lat, lng =$lng'),
       ),
     );
   }
