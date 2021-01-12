@@ -1,5 +1,8 @@
+//import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:kaewosp/utility/dialog.dart';
 import 'package:kaewosp/utility/my_style.dart';
 import 'package:location/location.dart';
 
@@ -11,14 +14,25 @@ class Register extends StatefulWidget {
 class _RegisterState extends State<Register> {
   //ประกาศตัวแปร
   double screen;
-  String typeUser;
+  String typeUser, token, name, user, password;
   double lat, lng;
 
 //ทำงานก่อน Build
   @override
   void initState() {
     super.initState();
-    findLatLng();
+    findLatLng(); //หาพิกัด
+    findToken();
+  }
+
+  Future<Null> findToken() async {
+    // await Firebase.initializeApp().then((value) {
+    //   print('#########Initialize Success###########');
+    // });
+
+    FirebaseMessaging messaging = FirebaseMessaging();
+    token = await messaging.getToken();
+    print('token = $token');
   }
 
   //ทำงานรอผลลัพธ์ ถ้า Method ทำงานแล้วไม่บอกผลลัพธ์
@@ -47,6 +61,8 @@ class _RegisterState extends State<Register> {
       margin: EdgeInsets.only(top: 50), //กำหนดระยะห่าง
       width: screen * 0.6,
       child: TextField(
+        //get ค่าจาก textfield
+        onChanged: (value) => name = value.trim(),
         decoration: InputDecoration(
           hintStyle: TextStyle(color: MyStyle().darkColor), //ใส่สีให้ hintStyle
           prefixIcon: Icon(
@@ -75,13 +91,16 @@ class _RegisterState extends State<Register> {
       margin: EdgeInsets.only(top: 16), //กำหนดระยะห่าง
       width: screen * 0.6,
       child: TextField(
+        onChanged: (value) => user = value.trim(),
+        //กำหนดคีย์บอร์ด
+        keyboardType: TextInputType.emailAddress,
         decoration: InputDecoration(
           hintStyle: TextStyle(color: MyStyle().darkColor), //ใส่สีให้ hintStyle
           prefixIcon: Icon(
-            Icons.lock_outline,
+            Icons.email_outlined,
             color: MyStyle().darkColor,
           ), //ใส่ icon ใน textfield
-          hintText: 'User : ',
+          hintText: 'Email : ',
           enabledBorder: OutlineInputBorder(
               //โชว์ปกติ
               borderRadius: BorderRadius.circular(20), //ทำให้โค้ง
@@ -103,10 +122,11 @@ class _RegisterState extends State<Register> {
       margin: EdgeInsets.only(top: 16), //กำหนดระยะห่าง
       width: screen * 0.6,
       child: TextField(
+        onChanged: (value) => password = value.trim(),
         decoration: InputDecoration(
           hintStyle: TextStyle(color: MyStyle().darkColor), //ใส่สีให้ hintStyle
           prefixIcon: Icon(
-            Icons.perm_identity,
+            Icons.lock_outline,
             color: MyStyle().darkColor,
           ), //ใส่ icon ใน textfield
           hintText: 'Password : ',
@@ -129,98 +149,120 @@ class _RegisterState extends State<Register> {
     return Scaffold(
       //สร้างบาร์ด้านบน
       appBar: AppBar(
-        //ใส่สี
-        backgroundColor: MyStyle().primaryColor,
-        //ใส่ข้อความ
-        title: Text('Register'),
-      ),
-      body: Center(
-        //กด Ctrl + . เลือก Wrap with Center
-        child: Column(
-          children: [
-            //กด Ctrl + . เลือก Wrap with Column
-            buildName(),
-            //typeUser คือ ตัวแปรที่ประกาศไว้ด้านบน
-            buildRadioUser(),
-            buildRadioShoper(),
-            buildUser(),
-            buildPassword(),
-
-            //กำหนดแผนที่
-            buildMap(),
-          ],
-        ),
-      ),
-    );
-  }
-
-//มี Marker ได้มากกว่า 1 ตัว
-  Set<Marker> markers() => <Marker>[
-        Marker(
-          markerId: MarkerId('idMarker1'),
-          position: LatLng(lat, lng),
-          infoWindow: InfoWindow(
-              title: 'คุณอยู่ที่นี่', snippet: 'Lat =$lat, Lng=$lng'),
-        ),
-      ].toSet();
-
-//Map
-  Expanded buildMap() {
-    return Expanded(
-      child: Container(
-        margin: EdgeInsets.all(16),
-        width: screen,
-        //color: Colors.grey,
-        //if else แบบสั้น
-        child: lat == null
-            ? MyStyle().showProgress()
-            : GoogleMap(
-                markers: markers(),
-                initialCameraPosition: CameraPosition(
-                  target: LatLng(lat, lng),
-                  zoom: 16,
-                ),
-                onMapCreated: (controller) {},
-              ),
-      ),
-    );
-  }
-
-//RadioListTile<String> buildRadioUser() {
-  //ใช้ Widget ก็ได้
-  Container buildRadioUser() {
-    return Container(
-      width: screen * 0.6,
-      child: RadioListTile(
-        subtitle: Text('Type User For Buyer'),
-        title: Text('User'),
-        value: 'User', //ค่าคืออะไร
-        groupValue: typeUser,
-        //กดแล้วได้อะไร
-        onChanged: (value) {
-          setState(() {
-            typeUser = value;
-          });
-        },
-      ),
-    );
-  }
-
-  Container buildRadioShoper() {
-    return Container(
-      width: screen * 0.6,
-      child: RadioListTile(
-        subtitle: Text('สำหรับร้านค้าที่ต้องการขายสินค้า'),
-        title: Text('Shoper'),
-        value: 'Shoper', //ค่าคืออะไร
-        groupValue: typeUser,
-        //กดแล้วได้อะไร
-        onChanged: (value) {
-          setState(() {
-            typeUser = value;
-          });
-        },
-      ),
-    );
-  }
+        actions: [
+          IconButton(
+              icon: Icon(Icons.cloud_upload_outlined),
+              onPressed: () {
+                print(
+                    'name = $name, user =$user, password = $password, typeUser = $typeUser');
+                //เช็คค่าว่าง และไม่กรอกข้อมูล
+                if ((name == null || name.isEmpty) ||
+                    (user?.isEmpty ?? true) ||
+                    (password?.isEmpty ?? true)) {
+                  normalDialog(context, 'Have Space ? Please Fill Every Blank');
+                } else if (typeUser == null) {
+                  normalDialog(context, 'Type User ? Please Choose Type User');
+                } else {
+                  registerAndInsertData();
+                                  }
+                                })
+                          ],
+                          //ใส่สี
+                          backgroundColor: MyStyle().primaryColor,
+                          //ใส่ข้อความ
+                          title: Text('Register'),
+                        ),
+                        body: Center(
+                          //กด Ctrl + . เลือก Wrap with Center
+                          //ใส่ Scrollview
+                          child: SingleChildScrollView(
+                            child: Column(
+                              children: [
+                                //กด Ctrl + . เลือก Wrap with Column
+                                buildName(),
+                                //typeUser คือ ตัวแปรที่ประกาศไว้ด้านบน
+                                buildRadioUser(),
+                                buildRadioShoper(),
+                                buildUser(),
+                                buildPassword(),
+                  
+                                //กำหนดแผนที่
+                                buildMap(),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                  
+                  //มี Marker ได้มากกว่า 1 ตัว
+                    Set<Marker> markers() => <Marker>[
+                          Marker(
+                            markerId: MarkerId('idMarker1'),
+                            position: LatLng(lat, lng),
+                            infoWindow: InfoWindow(
+                                title: 'คุณอยู่ที่นี่', snippet: 'Lat =$lat, Lng=$lng'),
+                          ),
+                        ].toSet();
+                  
+                  //Map
+                    Widget buildMap() {
+                      return Container(
+                        margin: EdgeInsets.all(16),
+                        width: screen,
+                        height: screen * 0.6,
+                        //color: Colors.grey,
+                        //if else แบบสั้น
+                        child: lat == null
+                            ? MyStyle().showProgress()
+                            : GoogleMap(
+                                markers: markers(),
+                                initialCameraPosition: CameraPosition(
+                                  target: LatLng(lat, lng),
+                                  zoom: 16,
+                                ),
+                                onMapCreated: (controller) {},
+                              ),
+                      );
+                    }
+                  
+                  //RadioListTile<String> buildRadioUser() {
+                    //ใช้ Widget ก็ได้
+                    Container buildRadioUser() {
+                      return Container(
+                        width: screen * 0.6,
+                        child: RadioListTile(
+                          subtitle: Text('Type User For Buyer'),
+                          title: Text('User'),
+                          value: 'User', //ค่าคืออะไร
+                          groupValue: typeUser,
+                          //กดแล้วได้อะไร
+                          onChanged: (value) {
+                            setState(() {
+                              typeUser = value;
+                            });
+                          },
+                        ),
+                      );
+                    }
+                  
+                    Container buildRadioShoper() {
+                      return Container(
+                        width: screen * 0.6,
+                        child: RadioListTile(
+                          subtitle: Text('สำหรับร้านค้าที่ต้องการขายสินค้า'),
+                          title: Text('Shoper'),
+                          value: 'Shoper', //ค่าคืออะไร
+                          groupValue: typeUser,
+                          //กดแล้วได้อะไร
+                          onChanged: (value) {
+                            setState(() {
+                              typeUser = value;
+                            });
+                          },
+                        ),
+                      );
+                    }
+                  //Return ค่ากลับ
+                    Future<Null> registerAndInsertData()async {}
 }

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "840627385053",
+    "project_id": "kaewosp",
+    "storage_bucket": "kaewosp.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:840627385053:android:15eda16c422f8257802134",
+        "android_client_info": {
+          "package_name": "com.flutterthailand.kaewosp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "840627385053-42feh86ec0qk80a6pjjjjqre82mq8bah.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8lkPr2Rk7gQnoqRA9K_eGl5djeQbkra0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "840627385053-42feh86ec0qk80a6pjjjjqre82mq8bah.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

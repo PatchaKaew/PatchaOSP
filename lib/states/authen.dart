@@ -133,7 +133,7 @@ class _AuthenState extends State<Authen> {
 
   Text buildText() => Text(
         'PATCHA OSP',
-        style: GoogleFonts.caveat(
+        style: GoogleFonts.concertOne(
             textStyle: TextStyle(
           fontSize: 30,
           fontWeight: FontWeight.w700,
