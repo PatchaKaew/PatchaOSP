@@ -1,5 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:kaewosp/utility/dialog.dart';
 import 'package:kaewosp/utility/my_style.dart';
 
 class Authen extends StatefulWidget {
@@ -10,6 +14,7 @@ class Authen extends StatefulWidget {
 class _AuthenState extends State<Authen> {
   double screen; //ประกาศตัวแปรใช้แค่ใน Class
   bool status = true; //ประกาศตัวแปรมีค่า true flase
+  String user, password;
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +49,8 @@ class _AuthenState extends State<Authen> {
 
   FlatButton buildRegister() {
     return FlatButton(
-        onPressed: () => Navigator.pushNamed(context, '/register'), //ลิ้งค์ไปหน้าใหม่
+        onPressed: () =>
+            Navigator.pushNamed(context, '/register'), //ลิ้งค์ไปหน้าใหม่
         child: Text(
           'New Register',
           style: MyStyle().pinkStyle(),
@@ -58,7 +64,13 @@ class _AuthenState extends State<Authen> {
       child: RaisedButton(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         color: MyStyle().darkColor, //ใส่สีให้ปุ่ม
-        onPressed: () {},
+        onPressed: () {
+          if ((user?.isEmpty ?? true) || (password?.isEmpty ?? true)) {
+            normalDialog(context, 'กรอกข้อมูลค่ะ เว้นว่างไว้ทำไม');
+          } else {
+            checkAuthen();
+          }
+        },
         child: Text(
           'Log in',
           style: MyStyle().whiteStyle(),
@@ -75,6 +87,7 @@ class _AuthenState extends State<Authen> {
       margin: EdgeInsets.only(top: 16), //กำหนดระยะห่าง
       width: screen * 0.6,
       child: TextField(
+        onChanged: (value) => user = value.trim(),
         decoration: InputDecoration(
           hintStyle: TextStyle(color: MyStyle().darkColor), //ใส่สีให้ hintStyle
           prefixIcon: Icon(
@@ -102,6 +115,7 @@ class _AuthenState extends State<Authen> {
       margin: EdgeInsets.only(top: 16), //กำหนดระยะห่าง
       width: screen * 0.6,
       child: TextField(
+        onChanged: (value) => password = value.trim(),
         obscureText: status, //ไม่แสดงรหัส
         decoration: InputDecoration(
           suffixIcon: IconButton(
@@ -147,5 +161,37 @@ class _AuthenState extends State<Authen> {
       width: screen * 0.33,
       child: Image.asset('images/logo.png'),
     );
+  }
+
+  Future<Null> checkAuthen() async {
+    await Firebase.initializeApp().then((value) async {
+      await FirebaseAuth.instance
+          .signInWithEmailAndPassword(email: user, password: password)
+          .then((value) async {
+        //Login ด้วย Type อะไร
+        String uid = value.user.uid;
+
+        print('xxxxxx uid = $uid');
+//อ่านค่าจากฐานข้อมูล
+        await FirebaseFirestore.instance
+            .collection('typeuser')
+            .doc(uid)
+            .snapshots()
+            .listen((event) {
+          String typeUser = event.data()['typeuser'];
+          print('***************typeuser = $typeUser');
+
+
+          Navigator.pushNamedAndRemoveUntil(
+            context, '/myservice$typeUser', (route) => false);
+
+
+        });
+
+        
+      }).catchError((value) {
+        normalDialog(context, value.message);
+      });
+    });
   }
 }
