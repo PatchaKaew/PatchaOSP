@@ -11,7 +11,7 @@ class MyStyle {
   Color primaryColor = Color(0xff0d47a1);
   Color lightColor = Color(0xff5472d3);
 
-   //Future<ListTile> buildSignOut(BuildContext context) async {
+  //Future<ListTile> buildSignOut(BuildContext context) async {
   Widget buildSignOut(BuildContext context) {
     return ListTile(
       onTap: () async {
@@ -38,6 +38,15 @@ class MyStyle {
   TextStyle whiteStyle() => TextStyle(color: Colors.white);
 
   TextStyle pinkStyle() => TextStyle(color: Colors.pink);
+
+  TextStyle titleH0Style() =>
+      TextStyle(color: Colors.red.shade700, fontSize: 35, fontWeight: FontWeight.bold);
+
+  TextStyle titleH1Style() =>
+      TextStyle(color: darkColor, fontSize: 30, fontWeight: FontWeight.bold);
+
+      TextStyle titleH2Style() =>
+      TextStyle(color: darkColor, fontSize: 18, fontWeight: FontWeight.w500);
 
   double findScreen(BuildContext context) {
     return MediaQuery.of(context).size.width; //หาว่าอยู่จอขนาดเท่าไหร่

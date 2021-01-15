@@ -1,8 +1,13 @@
 import 'dart:io';
+import 'dart:math';
 
+import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:kaewosp/utility/dialog.dart';
+import 'package:kaewosp/utility/my_constant.dart';
 import 'package:kaewosp/utility/my_style.dart';
 
 class AddProduct extends StatefulWidget {
@@ -13,8 +18,22 @@ class AddProduct extends StatefulWidget {
 class _AddProductState extends State<AddProduct> {
   double screen;
   File file;
-  String name, destcrip, price;
+  String name, destcrip, price, urlPath, uid;
   bool statusProcess = false;
+
+  @override
+  void initState() {
+    super.initState();
+    findUid();
+  }
+
+  Future<Null> findUid() async {
+    await Firebase.initializeApp().then((value) async {
+      await FirebaseAuth.instance.authStateChanges().listen((event) {
+        uid = event.uid;
+      });
+    });
+  }
 
   Container buildName() {
     return Container(
@@ -241,5 +260,25 @@ class _AddProductState extends State<AddProduct> {
     );
   }
 
-  void uploadImageAndInsertData() {}
+  Future<Null> uploadImageAndInsertData() async {
+    int i = Random().nextInt(1000000);
+    String nameImage = 'product$i.jpg';
+
+    try {
+      Map<String, dynamic> map = Map();
+      map['file'] =
+          await MultipartFile.fromFile(file.path, filename: nameImage);
+      FormData data = FormData.fromMap(map);
+      await Dio()
+          .post(MyConstant().urlSaveFile, data: data)
+          .then((value) async {
+        urlPath = 'keawproduct/$nameImage';
+        print('${MyConstant().domain}$urlPath');
+
+        String urlAPI =
+            'https://www.androidthai.in.th/osp/addDataKeaw.php?isAdd=true&uidshop=$uid&name=$name&detail=$destcrip&price=$price&urlproduct=$urlPath';
+        await Dio().get(urlAPI).then((value) => Navigator.pop(context));
+      });
+    } catch (e) {}
+  }
 }
